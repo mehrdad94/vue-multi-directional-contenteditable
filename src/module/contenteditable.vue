@@ -55,13 +55,15 @@
           }
         },
         mounted () {
+            var inputEvent = /Trident/.test( navigator.userAgent ) ? 'textinput' : 'input';
             this.$refs.contenteditable.addEventListener('paste', this.onPaste)
             this.$refs.contenteditable.addEventListener('keyup', this.onKeyUp)
             this.$refs.contenteditable.addEventListener('keydown', this.onKeyDown)
+            this.$refs.contenteditable.addEventListener(inputEvent, this.onInput)
             this.setContentEditableContent(this.computedContent)
         },
         methods: {
-            getClipboardDate () {
+            getClipboardDate (event) {
                 let text = ''
                 if (event.clipboardData) text = event.clipboardData.getData('text/plain')
                 else text = window.clipboardData.getData('text')
@@ -109,7 +111,7 @@
             onPaste (event) {
                 event.preventDefault()
 
-                this.insertHTMLManually(this.getClipboardDate())
+                this.insertHTMLManually(this.getClipboardDate(event))
             },
             isPrintableKey (event) {
                 switch (event.which) {
@@ -141,13 +143,13 @@
                     event.preventDefault()
                     document.execCommand('insertParagraph', false, 'div')
                     setChildrenDirection(this.$refs.contenteditable)
-                    return
                 }
-
-                formatBlock(() => {
-                    setChildrenDirection(this.$refs.contenteditable)
-                    this.$emit('change-event', this.getContentEditableContent())
-                })
+            },
+            onInput () {
+              formatBlock(() => {
+                setChildrenDirection(this.$refs.contenteditable)
+                this.$emit('change-event', this.getContentEditableContent())
+              })
             }
         }
     }

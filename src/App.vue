@@ -1,6 +1,6 @@
 <template>
   <div>
-    <md-contenteditable v-on:change-event="onContenteditableChange" :content="content"/>
+    <mdir-contenteditable v-on:change-event="onContenteditableChange" :content="content"/>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ export default {
   },
   methods: {
     onContenteditableChange (value) {
-      this.content = value
+      // console.log(value)
     }
   }
 }
