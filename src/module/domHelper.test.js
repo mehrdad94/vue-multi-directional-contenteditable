@@ -2,7 +2,8 @@ import {
     setElmDirection,
     isRTL,
     getInnerTextDirection,
-    getFirstTextNodes
+    getFirstTextNodes,
+    textToDivTags
 } from './domHelper'
 
 describe('dom helper', function () {
@@ -45,5 +46,13 @@ describe('dom helper', function () {
         const result = getFirstTextNodes(div)
 
         expect(result.wholeText).toBe(textNodeContent)
+    });
+
+    it('should turn raw text to div elements', function () {
+        const textNode = 'hi\nhi'
+
+        const result = textToDivTags(textNode)
+
+        expect(result).toBe('<div>hi</div><div>hi</div>')
     });
 })

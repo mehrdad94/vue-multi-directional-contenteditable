@@ -11,7 +11,8 @@
         formatBlock,
         moveCursorToLastElement,
         removeType_mozInFirefox,
-        textToHTMLTag
+        textToDivTags,
+        insertParagraph
     } from './domHelper'
 
     const isEmpty = text => text === ''
@@ -55,11 +56,10 @@
           }
         },
         mounted () {
-            var inputEvent = /Trident/.test( navigator.userAgent ) ? 'textinput' : 'input';
             this.$refs.contenteditable.addEventListener('paste', this.onPaste)
             this.$refs.contenteditable.addEventListener('keyup', this.onKeyUp)
             this.$refs.contenteditable.addEventListener('keydown', this.onKeyDown)
-            this.$refs.contenteditable.addEventListener(inputEvent, this.onInput)
+            this.$refs.contenteditable.addEventListener('input', this.onInput)
             this.setContentEditableContent(this.computedContent)
         },
         methods: {
@@ -72,7 +72,7 @@
             setContentEditableContent (content) {
                 const contenteditable = this.$refs.contenteditable
 
-                contenteditable.innerHTML = `${textToHTMLTag(content)}`
+                contenteditable.innerHTML = `${textToDivTags(content)}`
                 contenteditable.focus()
                 moveCursorToLastElement(contenteditable)
                 formatBlock(() => {
@@ -103,9 +103,12 @@
             },
             insertHTMLManually (text) {
                 const splitByEnter = text.split('\n')
+
                 splitByEnter.forEach(function (part, index) {
                     insertHTML(part)
-                    if (index !== splitByEnter.length - 1) document.execCommand('insertParagraph', false, 'div')
+                    if (index !== splitByEnter.length - 1) {
+                        insertParagraph()
+                    }
                 })
             },
             onPaste (event) {
@@ -141,21 +144,23 @@
 
                 if (this.paragraphKeyDetection(event)) {
                     event.preventDefault()
-                    document.execCommand('insertParagraph', false, 'div')
+                    insertParagraph(this.$refs.contenteditable)
                     setChildrenDirection(this.$refs.contenteditable)
+                } else {
+                    formatBlock(() => {
+                        setChildrenDirection(this.$refs.contenteditable)
+                        this.$emit('change-event', this.getContentEditableContent())
+                    })
                 }
             },
             onInput () {
-              formatBlock(() => {
                 setChildrenDirection(this.$refs.contenteditable)
-                this.$emit('change-event', this.getContentEditableContent())
-              })
             }
         }
     }
 </script>
 <style>
-    .custom-contenteditable {
-        min-height: 50px;
+    .custom-contenteditable div {
+        height: 20px;
     }
 </style>

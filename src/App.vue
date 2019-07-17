@@ -9,12 +9,12 @@ export default {
   name: 'app',
   data () {
     return {
-      content: '1, 2, 3 \n how you doing'
+      content: '1, 2, 3 <img alt="img" src=""/> \n how you doing \n well'
     }
   },
   methods: {
     onContenteditableChange (value) {
-      // console.log(value)
+      console.log(value)
     }
   }
 }
