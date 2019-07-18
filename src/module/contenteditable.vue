@@ -1,6 +1,8 @@
 <template>
-    <div contenteditable="true" ref="contenteditable" class="custom-contenteditable">
-        <div>
+    <div contenteditable="false">
+        <div contenteditable="true" ref="contenteditable" class="custom-contenteditable">
+            <div>
+            </div>
         </div>
     </div>
 </template>
@@ -161,6 +163,6 @@
 </script>
 <style>
     .custom-contenteditable div {
-        height: 20px;
+        padding: 20px 0;
     }
 </style>
