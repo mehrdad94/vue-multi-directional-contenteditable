@@ -184,5 +184,5 @@ export const insertParagraph = () => {
     if (textBeforeCaret !== undefined) endContainer.nodeValue = textBeforeCaret
 
     // move cursor to end of next line
-    range.setStart(textAfterCaret, 0)
+    selection.collapse(textAfterCaret, 0)
 }
