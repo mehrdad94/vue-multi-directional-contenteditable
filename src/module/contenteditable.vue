@@ -107,7 +107,7 @@
                 splitByEnter.forEach(function (part, index) {
                     insertHTML(part)
                     if (index !== splitByEnter.length - 1) {
-                        insertParagraph()
+                        insertParagraph(this.$refs.contenteditable)
                     }
                 })
             },

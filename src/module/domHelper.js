@@ -134,55 +134,60 @@ export const formatBlock = (clb) => {
     // })
 }
 
-export const insertParagraph = () => {
+export const insertParagraph = elm => {
     const selection = window.getSelection()
     const range = selection.getRangeAt(0)
-
-    // create a container for rest of nodes in endContainer
-    const container = document.createElement('div')
-    const { startOffset, endOffset } = range
-    let endContainer
-    let includeElm = false // element will included in next line
-    const isEndContainerDiv = range.endContainer.nodeName === 'DIV'
-
-    if (isEndContainerDiv) {
-        endContainer = range.endContainer.childNodes[range.endOffset]
-        includeElm = true
-    } else {
-        endContainer = range.endContainer
-    }
-
-    let textBeforeCaret
-    let textAfterCaret
-    if (endContainer && endContainer.nodeValue !== undefined) {
-        textBeforeCaret = endContainer.nodeValue.slice(0, startOffset)
-        textAfterCaret = document.createTextNode(endContainer.nodeValue.slice(endOffset))
-    } else {
-        textAfterCaret = document.createTextNode('\u00A0')
-    }
-
-    const nodesAfterCaret = getAllSiblings(endContainer, includeElm)
-
-    // create next line
-    container.appendChild(textAfterCaret)
-    nodesAfterCaret.forEach(node => {
-        container.appendChild(node)
-    })
-
-    // insert dom
-    if (endContainer) {
-        if (isEndContainerDiv) insertAfter(container, range.endContainer)
-        else insertAfter(container, range.endContainer.parentNode)
-    } else {
-        insertAfter(container, range.endContainer)
-    }
 
     // remove every thing between
     range.deleteContents()
 
-    // remove text after caret
-    if (textBeforeCaret !== undefined) endContainer.nodeValue = textBeforeCaret
+    const getTargetNode = (elm, { endContainer, endOffset }) => {
+        if (elm === endContainer) {
+            return endContainer.childNodes[endOffset]
+        } else if (endContainer.nodeName === 'DIV') {
+            return endContainer
+        } else {
+            return endContainer.parentNode
+        }
+    }
 
-    // move cursor to end of next line
+    const getContentAfterAndBeforeCaret = ({ endContainer, startOffset, endOffset }) => {
+        let textBeforeCaret
+        let textAfterCaret
+        if (endContainer && endContainer.nodeValue !== null && endContainer.nodeValue !== undefined) {
+            textBeforeCaret = endContainer.nodeValue.slice(0, startOffset)
+            textAfterCaret = document.createTextNode(endContainer.nodeValue.slice(endOffset))
+        } else {
+            textAfterCaret = document.createTextNode('\u00A0')
+        }
+        return { textBeforeCaret, textAfterCaret }
+    }
+
+    const getNodesAfterCaret = ({ endContainer }) => {
+        if (elm === endContainer) {
+            return []
+        } else {
+            return getAllSiblings(endContainer)
+        }
+    }
+
+    const createInsertionNode = ({ endContainer }, { textAfterCaret }) => {
+        const container = document.createElement('div')
+        container.appendChild(textAfterCaret)
+
+        if (endContainer.nodeName !== 'div') {
+            getNodesAfterCaret({ endContainer }).forEach(node => {
+               container.appendChild(node)
+            })
+        }
+
+        return container
+    }
+
+    const { textBeforeCaret, textAfterCaret } = getContentAfterAndBeforeCaret(range)
+    insertAfter(createInsertionNode(range, { textAfterCaret } ), getTargetNode(elm, range))
+
+    if (textBeforeCaret !== undefined) range.endContainer.nodeValue = textBeforeCaret
+
     selection.collapse(textAfterCaret, 0)
 }
