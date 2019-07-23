@@ -12,7 +12,8 @@
         moveCursorToLastElement,
         removeType_mozInFirefox,
         textToDivTags,
-        insertParagraph
+        insertParagraph,
+        is_firefox
     } from './domHelper'
 
     const isEmpty = text => text === ''
@@ -34,8 +35,8 @@
             },
             paragraphKeyDetection: {
                 type: Function,
-                default: function (event) {
-                    return (event.which === 13)
+                default: event => {
+                    return event.which === 13
                 }
             },
             beforeSetContent: {
@@ -75,10 +76,9 @@
                 contenteditable.innerHTML = `${textToDivTags(content)}`
                 contenteditable.focus()
                 moveCursorToLastElement(contenteditable)
-                formatBlock(() => {
-                    setChildrenDirection(contenteditable)
-                    removeType_mozInFirefox(contenteditable)
-                })
+                formatBlock(contenteditable)
+                setChildrenDirection(contenteditable)
+                if (is_firefox) removeType_mozInFirefox(contenteditable)
             },
             getTextNodeContent (node) {
                 return node.innerText || node.textContent
@@ -103,11 +103,12 @@
             },
             insertHTMLManually (text) {
                 const splitByEnter = text.split('\n')
+                const contenteditable = this.$refs.contenteditable
 
-                splitByEnter.forEach(function (part, index) {
+                splitByEnter.forEach((part, index) => {
                     insertHTML(part)
                     if (index !== splitByEnter.length - 1) {
-                        insertParagraph(this.$refs.contenteditable)
+                        insertParagraph(contenteditable)
                     }
                 })
             },
@@ -141,16 +142,16 @@
             },
             onKeyUp (event) {
                 if (!this.isPrintableKey(event)) return
+                const contenteditable = this.$refs.contenteditable
 
                 if (this.paragraphKeyDetection(event)) {
                     event.preventDefault()
-                    insertParagraph(this.$refs.contenteditable)
-                    setChildrenDirection(this.$refs.contenteditable)
+                    insertParagraph(contenteditable)
+                    setChildrenDirection(contenteditable)
                 } else {
-                    formatBlock(() => {
-                        setChildrenDirection(this.$refs.contenteditable)
-                        this.$emit('change-event', this.getContentEditableContent())
-                    })
+                    formatBlock(contenteditable)
+                    setChildrenDirection(contenteditable)
+                    this.$emit('change-event', this.getContentEditableContent())
                 }
             },
             onInput () {

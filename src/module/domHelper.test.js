@@ -1,4 +1,5 @@
 import {
+    isElementDiv,
     setElmDirection,
     isRTL,
     getInnerTextDirection,
@@ -14,6 +15,10 @@ describe('dom helper', function () {
     beforeEach(() => {
         div = document.createElement('div')
     })
+
+    it('should check is element div', function () {
+        expect(isElementDiv(div)).toBeTruthy()
+    });
 
     it('should detect text direction', function () {
         expect(isRTL(rtlText)).toBe(true)

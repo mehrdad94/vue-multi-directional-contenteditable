@@ -1,4 +1,5 @@
-export const isIE = /Trident/.test(navigator.userAgent)
+export const is_firefox = /firefox/i.test(navigator.userAgent)
+export const isElementDiv = elm => elm.nodeName === 'DIV'
 
 export const insertAfter = (newElement,targetElement) => {
     // target is what you want it to go after. Look for this elements parent.
@@ -63,13 +64,6 @@ export const removeType_mozInFirefox = elm => {
     })
 }
 
-export const removePraghraphsIE = elm => {
-    Array.from(elm.querySelectorAll('p')).forEach(item => {
-        item.remove()
-    })
-}
-
-
 export const moveCursorToLastElement = el => {
     if (window.getSelection) {
         const range = document.createRange()
@@ -99,7 +93,7 @@ export const insertHTML = (html, selectPastedContent) => {
             range = sel.getRangeAt(0);
             range.deleteContents();
 
-            var el = document.createElement("div");
+            var el = document.createElement('div');
             el.innerHTML = html;
             var frag = document.createDocumentFragment(), node, lastNode;
             while ( (node = el.firstChild) ) {
@@ -123,15 +117,20 @@ export const insertHTML = (html, selectPastedContent) => {
     }
 }
 
-export const formatBlock = (clb) => {
-    return
-    // setTimeout(function () {
-    //     const result = document.execCommand('formatblock', false, 'div')
-    //     if (!result) {
-    //         document.execCommand('formatblock', false, '<p>')
-    //     }
-    //     if (clb) clb()
-    // })
+export const formatBlock = elm => {
+    const divElements = Array.from(elm.childNodes).filter(isElementDiv)
+
+    if (divElements.length === 0) {
+        const selection = window.getSelection()
+        const div = document.createElement('div')
+        const emptyTextNode = document.createTextNode('\u00A0')
+
+        div.appendChild(emptyTextNode)
+
+        elm.appendChild(div)
+
+        selection.collapse(emptyTextNode, 0)
+    }
 }
 
 export const insertParagraph = elm => {
@@ -144,7 +143,7 @@ export const insertParagraph = elm => {
     const getTargetNode = (elm, { endContainer, endOffset }) => {
         if (elm === endContainer) {
             return endContainer.childNodes[endOffset]
-        } else if (endContainer.nodeName === 'DIV') {
+        } else if (isElementDiv(endContainer)) {
             return endContainer
         } else {
             return endContainer.parentNode
